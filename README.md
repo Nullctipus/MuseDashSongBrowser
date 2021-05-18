@@ -1,5 +1,5 @@
 # MuseDashSongBrowser
-Browse Ranked Songs form [mdmc.moe](https://mdmc.moe/charts) inside Musedash
+Browse Ranked Songs from [mdmc.moe](https://mdmc.moe/charts) inside Musedash
 
 ## How to use
 Launch once and it will create a file called `SongBrowserkey.txt` inside contains the key that will open the menu (Default: F11)
