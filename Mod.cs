@@ -237,7 +237,7 @@ namespace SongBrowser
 
         public string Author => "BustR75";
 
-        public string HomePage => "Is this even used?";
+        public string HomePage => "https://github.com/BustR75/MuseDashSongBrowser";
 
 		public static HarmonyMethod GetPatch(string name)
 		{
