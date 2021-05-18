@@ -35,6 +35,32 @@ namespace SongBrowser
 			}
 		}
 		KeyCode MenuKey = KeyCode.Insert;
+		public void LoadImage(int type, string url)
+        {
+			Mod.DownloadData(url, delegate (byte[] data)
+			{
+				Texture2D texture = new Texture2D(1, 1, TextureFormat.ARGB32, false, true);
+				texture.LoadImage(data);
+				texture.mipMapBias = 0;
+				texture.anisoLevel = 1;
+				texture.filterMode = FilterMode.Bilinear;
+				texture.Apply();
+                switch (type) 
+				{
+					case 0:
+						easy = texture;
+						break;
+
+					case 1:
+						hard = texture;
+						break;
+
+					default:
+						master = texture;
+						break;
+				}
+			});
+		}
 		public void Start()
         {
 			if (!File.Exists(Path.Combine(Mod.CurrentDirectory, "SongBrowserkey.txt")))
@@ -43,33 +69,9 @@ namespace SongBrowser
 			}
 			MenuKey = (KeyCode)Enum.Parse(typeof(KeyCode), File.ReadAllText(Path.Combine(Mod.CurrentDirectory, "SongBrowserkey.txt")));
 			windowRect = new Rect(Screen.width / 3, Screen.height / 3, 950, Screen.height / 1.5f);
-			Mod.DownloadData(starurls[0], delegate (byte[] data) 
-			{
-				easy = new Texture2D(1, 1, TextureFormat.ARGB32, false, true);
-				easy.LoadImage(data);
-				easy.mipMapBias = 0;
-				easy.anisoLevel = 1;
-				easy.filterMode = FilterMode.Bilinear;
-				easy.Apply();
-			});
-			Mod.DownloadData(starurls[1], delegate (byte[] data)
-			{
-				hard = new Texture2D(1, 1, TextureFormat.ARGB32, false, true);
-				hard.LoadImage(data);
-				hard.mipMapBias = 0;
-				hard.anisoLevel = 1;
-				hard.filterMode = FilterMode.Bilinear;
-				hard.Apply();
-			});
-			Mod.DownloadData(starurls[2], delegate (byte[] data)
-			{
-				master = new Texture2D(1, 1, TextureFormat.ARGB32, false, true);
-				master.LoadImage(data);
-				master.mipMapBias = 0;
-				master.anisoLevel = 1;
-				master.filterMode = FilterMode.Bilinear;
-				master.Apply();
-			});
+			LoadImage(0, starurls[0]);
+			LoadImage(1, starurls[1]);
+			LoadImage(2, starurls[2]);
 
 
 		}
@@ -101,6 +103,7 @@ namespace SongBrowser
 			}
 			// generate space because bad
 			GUILayout.Space(final*230/3+(final%3>0 ? 200 : 0));
+			GUILayout.Label(console);
 			GUILayout.EndScrollView();
 			GUI.DragWindow(new Rect(0, 0, Screen.width, Screen.height));
 		}
@@ -114,6 +117,18 @@ namespace SongBrowser
 			GUILayout.EndHorizontal();
 			return width / 2 - scale + (scale / 2);
 		}
+		public void Log(string text,float time = 5)
+        {
+			StartCoroutine(LogTime(text, time));
+        }
+		IEnumerator LogTime(string text, float time)
+        {
+			console = text;
+			yield return new WaitForSeconds(time);
+			if (console == text)
+				console = "";
+        }
+		string console = "";
 		Color back = new Color(0.188f, 0.125f, 0.349f);
 		Color forr = new Color(1, 1 / 3, 0.764f);
 		public void CreateChart(ChartInfo chart,int x, int y)
@@ -133,20 +148,23 @@ namespace SongBrowser
 			CenterText("By " + chart.author,300);
 			CenterText("Designer: " + chart.levelDesigner + "   BPM:" + chart.bpm, 300);
 
-			/*GUILayout.Label(chart.name);
-			GUILayout.Label("By " + chart.author);
-			GUILayout.Label("Designer: "+chart.levelDesigner + "   BPM:" + chart.bpm);*/
-
 			GUILayout.BeginHorizontal();
 			Color c2 = GUI.contentColor;
 			GUI.backgroundColor =back;
 			GUI.contentColor = forr;
             if (GUILayout.Button("Download", GUILayout.Height(40)))
             {
-				ModLogger.AddLog("CreateChart", "Download", new NotImplementedException("Download MDM"));
+
+				ModLogger.AddLog("CustomAlbum", "Downloading", chart.name);
+				Log("Downloading " + chart.name);
+				Mod.DownloadData("https://mdmc.moe/api/download/" + chart.id, delegate (byte[] data)
+				   {
+					   ModLogger.AddLog("CustomAlbum", "Downloaded", chart.name);
+					   Log("Downloaded " + chart.name);
+					   CustomAlbumInterface.Inject(chart.name, Convert.FromBase64String(Encoding.Default.GetString(data)));
+				   });
             }
 			GUI.contentColor = c2;
-			//GUILayout.Label("Difficulty: "+ chart.difficulty1+" "+ chart.difficulty2+ " "+ chart.difficulty3);
 			GUI.backgroundColor = Color.clear;
 			GUILayout.Box(new GUIContent(chart.difficulty1 == "0" ? "" : chart.difficulty1, chart.difficulty1 == "0" ? null : easy), GUILayout.Width(60), GUILayout.Height(40));
 			GUILayout.Box(new GUIContent(chart.difficulty2 == "0" ? "" : chart.difficulty2, chart.difficulty2 == "0" ? null : hard), GUILayout.Width(60), GUILayout.Height(40));

@@ -6,7 +6,15 @@ Launch once and it will create a file called `SongBrowserkey.txt` inside contain
 
 uses Unity Keycode Enum names
 
-click the menu key defined before find a song you like and click download
+Click the Menu Key defined before
+
+Find a song you like 
+
+Click Download 
+
+Back out to MainMenu
+
+Go to Custom Albums
 
 ## Compatibility
 This mod works with both HQ and Normal CustomAlbumMod.
