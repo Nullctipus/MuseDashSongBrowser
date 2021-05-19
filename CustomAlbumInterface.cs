@@ -14,10 +14,20 @@ namespace SongBrowser
     public static class CustomAlbumInterface
     {
         static FieldInfo mods;
+        static bool printmods = true;
         static List<IMod> Mods
         {
             get
             {
+                if (printmods)
+                {
+                    printmods = false;
+                    Menu.VLog("Found Mods");
+                    foreach(var v in (List<IMod>)mods.GetValue(null))
+                    {
+                        Menu.VLog(v);
+                    }
+                }
                 return (List<IMod>)mods.GetValue(null);
             }
             set
@@ -131,14 +141,26 @@ namespace SongBrowser
         }
         public static void Init()
         {
+            Menu.VLog("Setting Up Custom Album Reflection");
             mods = typeof(ModLoader.ModLoader).GetField("mods", BindingFlags.NonPublic | BindingFlags.Static);
             if (CustomAlbum == null)
                 CustomAlbum = Mods.First(x => x.Name == "CustomAlbum" && x.Author == "Mo10");
+            try
+            {
+                Menu.VLog("...." + CustomAlbum.Name);
+            }
+            catch
+            {
 
+            }
             Type Skinchanger = Mods.First(x => x.Author == "BustR75" && x.Description == "Change the textures on the characters").GetType();
             if (Skinchanger != null)
                 skinchangermenu = Skinchanger.GetField("ShowMenu", BindingFlags.Public | BindingFlags.Static);
-
+            try
+            {
+                Menu.VLog("...." + skinchangermenu.Name);
+            }
+            catch { Menu.VLog("Didn't find SkinChanger"); }
             if (CustomAlbum == null)
             {
                 ModLogger.AddLog("CustomAlbumInterface", "Init", "Failed to find CustomAlbum Mod, Downloading Now");
@@ -160,27 +182,41 @@ namespace SongBrowser
                     }
                     typeof(ModLoader.ModLoader).GetMethod("LoadDependency", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { ass });
                     Init();
+                    Menu.VLog("Loaded CustomAlbum Mod");
 
                 });
                 return;
             }
             if (CustomType == null)
                 CustomType = CustomAlbum.GetType();
+            Menu.VLog("...." + CustomType.Name);
             CustomAlbumInfo = CustomType.Assembly.GetTypes().First(x => x.Name == "CustomAlbumInfo");
+            Menu.VLog("...." + CustomAlbumInfo.Name);
             CustomAlbumFromFile = CustomAlbumInfo.GetMethods().First(x => x.Name == "LoadFromFile");
+            Menu.VLog("...." + CustomAlbumFromFile.Name);
             Type customalbum = CustomType.Assembly.GetTypes().First(x => x.Name == "CustomAlbum");
+            Menu.VLog("...." + customalbum.Name);
             albums = customalbum.GetField("Albums", BindingFlags.Static | BindingFlags.Public);
+            Menu.VLog("...." + albums.Name);
             albumPackPath = customalbum.GetField("AlbumPackPath", BindingFlags.Static | BindingFlags.Public);
+            Menu.VLog("...." + albumPackPath.Name);
             musicPackgeUid = customalbum.GetField("MusicPackgeUid", BindingFlags.Static | BindingFlags.Public);
+            Menu.VLog("...." + musicPackgeUid.Name);
             jsonName = customalbum.GetField("JsonName", BindingFlags.Static | BindingFlags.Public);
+            Menu.VLog("...." + jsonName.Name);
             customAssets = CustomType.Assembly.GetTypes().First(x => x.Name == "DataPatch").GetField("customAssets",BindingFlags.Public|BindingFlags.Static);
+            Menu.VLog("...." + customAssets.Name);
 
             m_Dictionary = typeof(Assets.Scripts.PeroTools.Managers.ConfigManager).GetField("m_Dictionary", BindingFlags.NonPublic | BindingFlags.Instance);
+            Menu.VLog("...." + m_Dictionary.Name);
             InitMusicInfo = typeof(Assets.Scripts.UI.Panels.PnlStage).GetMethod("InitMusicInfo", BindingFlags.NonPublic | BindingFlags.Instance);
+            Menu.VLog("...." + InitMusicInfo.Name);
+            Menu.VLog("Finished Custom Album Reflection");
 
         }
         public static void LoadCustomSong(string directory)
         {
+            Menu.VLog("Loading " + directory);
             bool flag = !Directory.Exists(AlbumPackPath);
             if (flag)
             {
@@ -194,6 +230,7 @@ namespace SongBrowser
                 if (flag2)
                 {
                     ModLogger.Debug(string.Format("Loaded archive:{0}", customAlbumInfo));
+                    Menu.Instance.Log(string.Format("Loaded archive:{0}", customAlbumInfo));
                     IDictionary Buffer = Albums;
                     Buffer.Add("archive_" + fileNameWithoutExtension, customAlbumInfo);
                     Albums = Buffer;
@@ -202,6 +239,7 @@ namespace SongBrowser
             catch (Exception arg)
             {
                 ModLogger.Debug(string.Format("Load archive failed:{0},reason:{1}", directory, arg));
+                Menu.Instance.Log(string.Format("Load archive failed:{0},reason:{1}", directory, arg));
             }
             try
             {

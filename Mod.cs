@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Collections;
@@ -16,6 +17,7 @@ namespace SongBrowser
 {
 	public class Menu : MonoBehaviour
 	{
+		public static Menu Instance;
 		public static Rect windowRect = new Rect(Screen.width / 3, Screen.height / 3, 950, Screen.height / 1.5f);
 		public static bool ShowMenu = false;
 		static readonly string[] starurls = new string[]
@@ -33,6 +35,10 @@ namespace SongBrowser
 			{
 				windowRect = GUI.Window(0, windowRect, DoWindow, "Song Browser");
 			}
+			foreach(string s in console)
+            {
+				GUILayout.Label(s);
+            }
 		}
 		KeyCode MenuKey = KeyCode.Insert;
 		public void LoadImage(int type, string url)
@@ -63,12 +69,15 @@ namespace SongBrowser
 		}
 		public void Start()
         {
+			Instance = this;
 			if (!File.Exists(Path.Combine(Mod.CurrentDirectory, "SongBrowserkey.txt")))
 			{
 				File.WriteAllText(Path.Combine(Mod.CurrentDirectory, "SongBrowserkey.txt"), "F11");
 			}
 			MenuKey = (KeyCode)Enum.Parse(typeof(KeyCode), File.ReadAllText(Path.Combine(Mod.CurrentDirectory, "SongBrowserkey.txt")));
+			VLog("MenuKey: " + MenuKey);
 			windowRect = new Rect(Screen.width / 3, Screen.height / 3, 950, Screen.height / 1.5f);
+			VLog("windowRect: " + windowRect.ToString());
 			LoadImage(0, starurls[0]);
 			LoadImage(1, starurls[1]);
 			LoadImage(2, starurls[2]);
@@ -82,6 +91,7 @@ namespace SongBrowser
 				if (CustomAlbumInterface.SkinchangerMenu)
 					CustomAlbumInterface.SkinchangerMenu = false;
 				ShowMenu = !ShowMenu;
+				VLog(ShowMenu);
 			}
 		}
 		Vector2 scroll = Vector2.zero;
@@ -103,7 +113,6 @@ namespace SongBrowser
 			}
 			// generate space because bad
 			GUILayout.Space(final*230/3+(final%3>0 ? 200 : 0));
-			GUILayout.Label(console);
 			GUILayout.EndScrollView();
 			GUI.DragWindow(new Rect(0, 0, Screen.width, Screen.height));
 		}
@@ -117,18 +126,41 @@ namespace SongBrowser
 			GUILayout.EndHorizontal();
 			return width / 2 - scale + (scale / 2);
 		}
-		public void Log(string text,float time = 5)
-        {
+		public void Log(string text, float time = 5)
+		{
 			StartCoroutine(LogTime(text, time));
-        }
+		}
+		public static void VLog(object text, float time = 5)
+		{
+			try
+			{
+				Menu.Instance.VLog(text, true, time);
+			}
+            catch
+            {
+
+            }
+		}
+		private void VLog(object text, bool uhh, float time = 5)
+		{
+			if (Mod.Verbose)
+			{
+				if(!Mod.INGAME)
+					StartCoroutine(LogTime(text.ToString(), time));
+
+				StackFrame frame = new StackTrace().GetFrame(1);
+				string name = frame.GetMethod().ReflectedType.Name;
+				string name2 = frame.GetMethod().Name;
+				ModLogger.AddLog(name, name2, text);
+			}
+		}
 		IEnumerator LogTime(string text, float time)
         {
-			console = text;
+			console.Add(text);
 			yield return new WaitForSeconds(time);
-			if (console == text)
-				console = "";
+			console.Remove(text);
         }
-		string console = "";
+		List<string> console = new List<string>();
 		Color back = new Color(0.188f, 0.125f, 0.349f);
 		Color forr = new Color(1, 1 / 3, 0.764f);
 		public void CreateChart(ChartInfo chart,int x, int y)
@@ -179,6 +211,16 @@ namespace SongBrowser
 
 	public class ChartInfo
 	{
+		public ChartInfo()
+        {
+			if (Mod.Verbose)
+				Menu.Instance.StartCoroutine(debug());
+        }
+		IEnumerator debug()
+        {
+			while (name == "") yield return new WaitForEndOfFrame();
+			Menu.VLog(this.ToString());
+		}
         public override string ToString()
         {
             return string.Concat($"Name: {name}\nAuthor: {author}\nLevelDesigner: {levelDesigner}\nLevelDesigner1: {levelDesigner1}\nLevelDesigner2: {levelDesigner2}\nLevelDesigner3: {levelDesigner3}\nLevelDesigner4: {levelDesigner4}\ndifficulty1: {difficulty1}\ndifficulty2: {difficulty2}\ndifficulty3: {difficulty3}\nBPM:{bpm}\n");
@@ -229,7 +271,9 @@ namespace SongBrowser
 		public string id = "0";
 	}
     public class Mod : IMod
-    {
+	{
+		public static bool Verbose = false;
+		public static bool INGAME = false;
 		public static Mod Instance;
         public string Name => "Song Browser";
 
@@ -252,13 +296,29 @@ namespace SongBrowser
 		static Harmony harmony;
 		public void DoPatching()
         {
-			Instance = this;
+			if (Environment.GetCommandLineArgs().Contains("--verbose"))
+				Verbose = true;
 			harmony = new Harmony("apo.bustr75.songbrowser");
+			if (Environment.GetCommandLineArgs().Contains("--ingameconsole")) 
+			{
+				INGAME = true;
+				harmony.Patch(typeof(ModHelper.ModLogger).GetMethod("AddLog",BindingFlags.Public|BindingFlags.Static),GetPatch(nameof(InGameConsole)));
+					}
+			Instance = this;
 			harmony.Patch(typeof(Assets.Scripts.GameCore.Managers.MainManager).GetMethod("InitLanguage", BindingFlags.NonPublic | BindingFlags.Instance), null, GetPatch(nameof(OnStart)));
 			CustomAlbumInterface.Init();
 		}
-		private static void OnStart()
+		private static void InGameConsole(string className, string methodName, object obj)
         {
+			try
+			{
+				menu.Log(string.Format("[{0}:{1}]: {2}", className, methodName, obj));
+			}
+			catch { }
+        }
+		private static void OnStart()
+		{
+			Menu.VLog("Starting");
 			GameObject brow = new GameObject();
 			GameObject.DontDestroyOnLoad(brow);
 			menu = brow.AddComponent<Menu>();
@@ -268,6 +328,7 @@ namespace SongBrowser
 		}
 		public static void DownloadData(string url, Action<byte[]> callback)
         {
+			Menu.VLog("Downloading " + url);
 			menu.StartCoroutine(downloadData(url, callback));
         }
 		static IEnumerator downloadData(string url,Action<byte[]> callback)
