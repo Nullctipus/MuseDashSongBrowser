@@ -143,8 +143,11 @@ namespace SongBrowser
         {
             Menu.VLog("Setting Up Custom Album Reflection");
             mods = typeof(ModLoader.ModLoader).GetField("mods", BindingFlags.NonPublic | BindingFlags.Static);
-            if (CustomAlbum == null)
-                CustomAlbum = Mods.First(x => x.Name == "CustomAlbum" && x.Author == "Mo10");
+            lock (Mods)
+            {
+                if (CustomAlbum == null)
+                    CustomAlbum = Mods.First(x => x.Name == "CustomAlbum" && x.Author == "Mo10");
+            }
             try
             {
                 Menu.VLog("...." + CustomAlbum.Name);

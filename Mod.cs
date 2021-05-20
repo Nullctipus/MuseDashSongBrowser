@@ -12,6 +12,7 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
+using Assets.Scripts.PeroTools.Commons;
 
 namespace SongBrowser
 {
@@ -30,19 +31,20 @@ namespace SongBrowser
 		static Texture2D hard;
 		static Texture2D master;
 		void OnGUI()
-        {
+		{
+			foreach (string s in console.Reverse<string>())
+			{
+				GUILayout.Label(s);
+			}
 			if (ShowMenu)
 			{
 				windowRect = GUI.Window(0, windowRect, DoWindow, "Song Browser");
 			}
-			foreach(string s in console)
-            {
-				GUILayout.Label(s);
-            }
+			
 		}
 		KeyCode MenuKey = KeyCode.Insert;
 		public void LoadImage(int type, string url)
-        {
+		{
 			Mod.DownloadData(url, delegate (byte[] data)
 			{
 				Texture2D texture = new Texture2D(1, 1, TextureFormat.ARGB32, false, true);
@@ -51,7 +53,7 @@ namespace SongBrowser
 				texture.anisoLevel = 1;
 				texture.filterMode = FilterMode.Bilinear;
 				texture.Apply();
-                switch (type) 
+				switch (type)
 				{
 					case 0:
 						easy = texture;
@@ -68,7 +70,7 @@ namespace SongBrowser
 			});
 		}
 		public void Start()
-        {
+		{
 			Instance = this;
 			if (!File.Exists(Path.Combine(Mod.CurrentDirectory, "SongBrowserkey.txt")))
 			{
@@ -81,8 +83,6 @@ namespace SongBrowser
 			LoadImage(0, starurls[0]);
 			LoadImage(1, starurls[1]);
 			LoadImage(2, starurls[2]);
-
-
 		}
 		public void Update()
 		{
@@ -97,7 +97,7 @@ namespace SongBrowser
 		Vector2 scroll = Vector2.zero;
 		public void DoWindow(int windowID)
 		{
-			scroll = GUILayout.BeginScrollView(scroll,false,true);
+			scroll = GUILayout.BeginScrollView(scroll, false, true);
 			int final = 0;
 			for (int i = 0; i < Mod.Charts.Length / 3; i++)
 			{
@@ -112,12 +112,12 @@ namespace SongBrowser
 				CreateChart(Mod.Charts[final + j], j, final);
 			}
 			// generate space because bad
-			GUILayout.Space(final*230/3+(final%3>0 ? 200 : 0));
+			GUILayout.Space(final * 230 / 3 + (final % 3 > 0 ? 200 : 0));
 			GUILayout.EndScrollView();
 			GUI.DragWindow(new Rect(0, 0, Screen.width, Screen.height));
 		}
-		public float CenterText(string text,int width)
-        {
+		public float CenterText(string text, int width)
+		{
 			float scale = GUI.skin.font.fontSize * text.Length / 2;
 			GUILayout.BeginHorizontal();
 			if (width / 2 - scale + (scale / 2) > 0)
@@ -136,33 +136,34 @@ namespace SongBrowser
 			{
 				Menu.Instance.VLog(text, true, time);
 			}
-            catch
-            {
+			catch
+			{
 
-            }
+			}
 		}
 		private void VLog(object text, bool uhh, float time = 5)
 		{
 			if (Mod.Verbose)
 			{
-				if(!Mod.INGAME)
+				if (!Mod.INGAME)
 					StartCoroutine(LogTime(text.ToString(), time));
 
-				StackFrame frame = new StackTrace().GetFrame(1);
+				StackFrame frame = new StackTrace().GetFrame(3);
 				string name = frame.GetMethod().ReflectedType.Name;
 				string name2 = frame.GetMethod().Name;
 				ModLogger.AddLog(name, name2, text);
 			}
 		}
 		IEnumerator LogTime(string text, float time)
-        {
+		{
 			console.Add(text);
 			yield return new WaitForSeconds(time);
 			console.Remove(text);
-        }
+		}
 		List<string> console = new List<string>();
 		Color back = new Color(0.188f, 0.125f, 0.349f);
 		Color forr = new Color(1, 1 / 3, 0.764f);
+	
 		public void CreateChart(ChartInfo chart,int x, int y)
         {
 			GUILayout.BeginArea(new Rect(x*310,y*240,300,230));
@@ -335,7 +336,11 @@ namespace SongBrowser
         {
 			UnityWebRequest www = UnityWebRequest.Get(url);
 			www.SendWebRequest();
-			while (!www.downloadHandler.isDone) yield return new WaitForEndOfFrame();
+			while (!www.downloadHandler.isDone) 
+			{
+				//Menu.VLog(www.downloadProgress);
+				yield return new WaitForEndOfFrame(); 
+			}
 			callback.Invoke(www.downloadHandler.data);
         }
 		public static ChartInfo[] Charts;

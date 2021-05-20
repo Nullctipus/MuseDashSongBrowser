@@ -43,6 +43,10 @@
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Muse Dash\MuseDash_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="GameFlow">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Muse Dash\MuseDash_Data\Managed\GameFlow.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="ModHelper">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Muse Dash\ModHelper.dll</HintPath>
       <Private>False</Private>
@@ -64,6 +68,10 @@
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Muse Dash\MuseDash_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Muse Dash\MuseDash_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
@@ -98,8 +106,16 @@
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Muse Dash\MuseDash_Data\Managed\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Muse Dash\MuseDash_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Muse Dash\MuseDash_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestWWWModule">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Muse Dash\MuseDash_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.WebModule">
@@ -115,6 +131,9 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
