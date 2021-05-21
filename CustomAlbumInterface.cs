@@ -217,25 +217,21 @@ namespace SongBrowser
             Menu.VLog("Finished Custom Album Reflection");
 
         }
+
         public static void LoadCustomSong(string directory)
         {
             Menu.VLog("Loading " + directory);
-            bool flag = !Directory.Exists(AlbumPackPath);
-            if (flag)
-            {
-                Directory.CreateDirectory(AlbumPackPath);
-            }
+            // edited code originating from customalbum mod -> LoadCustomAlbums (https://github.com/mo10/MuseDashCustomAlbumMod)
+            if (!Directory.Exists(AlbumPackPath)) Directory.CreateDirectory(AlbumPackPath);
             try
             {
-                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(directory);
                 object customAlbumInfo = CustomAlbumFromFile.Invoke(null, new object[] { directory });
-                bool flag2 = customAlbumInfo != null;
-                if (flag2)
+                if (customAlbumInfo != null)
                 {
                     ModLogger.Debug(string.Format("Loaded archive:{0}", customAlbumInfo));
                     Menu.Instance.Log(string.Format("Loaded archive:{0}", customAlbumInfo));
                     IDictionary Buffer = Albums;
-                    Buffer.Add("archive_" + fileNameWithoutExtension, customAlbumInfo);
+                    Buffer.Add("archive_" + Path.GetFileNameWithoutExtension(directory), customAlbumInfo);
                     Albums = Buffer;
                 }
             }
