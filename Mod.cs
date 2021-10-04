@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Net.Mime;
+using System.Runtime.InteropServices;
 using System;
 using System.Diagnostics;
 using System.Reflection;
@@ -28,9 +29,7 @@ namespace SongBrowser
 			"https://mdmc.moe/images/icon_hard.png",
 			"https://mdmc.moe/images/icon_master.png"
 		};
-		static Texture2D easy;
-		static Texture2D hard;
-		static Texture2D master;
+		static Texture2D easy,hard,master;
 		void OnGUI()
 		{
 			foreach (string s in console.Reverse<string>())
@@ -200,15 +199,22 @@ namespace SongBrowser
             }
 			GUI.contentColor = c2;
 			GUI.backgroundColor = Color.clear;
-			GUILayout.Box(new GUIContent(chart.difficulty1 == "0" ? "" : chart.difficulty1, chart.difficulty1 == "0" ? null : easy), GUILayout.Width(60), GUILayout.Height(40));
+
+			star(easy,chart.difficulty1);
+			star(hard,chart.difficulty2);
+			star(master,chart.difficulty3);
+			/*GUILayout.Box(new GUIContent(chart.difficulty1 == "0" ? "" : chart.difficulty1, chart.difficulty1 == "0" ? null : easy), GUILayout.Width(60), GUILayout.Height(40));
 			GUILayout.Box(new GUIContent(chart.difficulty2 == "0" ? "" : chart.difficulty2, chart.difficulty2 == "0" ? null : hard), GUILayout.Width(60), GUILayout.Height(40));
-			GUILayout.Box(new GUIContent(chart.difficulty3 == "0" ? "" : chart.difficulty3, chart.difficulty3 == "0" ? null : master), GUILayout.Width(60), GUILayout.Height(40));
+			GUILayout.Box(new GUIContent(chart.difficulty3 == "0" ? "" : chart.difficulty3, chart.difficulty3 == "0" ? null : master), GUILayout.Width(60), GUILayout.Height(40));*/
 			GUI.backgroundColor = c;
 
 			GUILayout.EndHorizontal();
 
 			GUILayout.EndArea();
         }
+		void star(Texture2D image,string diff){
+			GUILayout.Box(new GUIContent(diff == "0" ? "" : diff, diff == "0" ? null : image), GUILayout.Width(60), GUILayout.Height(40));
+		}
     }
 
 	public class ChartInfo
