@@ -124,8 +124,7 @@ namespace SongBrowser
             {
                 ModLogger.AddLog("CustomAlbum", "Injecting", name);
                 Mod.menu.Log("Injecting " + name);
-                //TODO: What the fuck
-                string directory = Path.Combine(Mod.CurrentDirectory, AlbumPackPath ?? "Custom_Songs" + "\\" + name + ".mdm");
+                string directory = Path.Combine(Mod.CurrentDirectory, AlbumPackPath ?? "Custom_Albums" + "\\" + name + ".mdm");
 
                 ModLogger.AddLog("CustomAlbum", "Create File", directory);
                 File.WriteAllBytes(directory, data);
