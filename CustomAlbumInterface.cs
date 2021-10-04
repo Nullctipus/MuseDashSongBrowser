@@ -19,16 +19,20 @@ namespace SongBrowser
         {
             get
             {
+                var Modlist = (List<IMod>)mods.GetValue(null);
                 if (printmods)
                 {
                     printmods = false;
                     Menu.VLog("Found Mods");
-                    foreach(var v in (List<IMod>)mods.GetValue(null))
+                    lock(Modlist)
                     {
-                        Menu.VLog(v);
+                        foreach(var v in Modlist)
+                        {
+                            Menu.VLog(v);
+                        }
                     }
                 }
-                return (List<IMod>)mods.GetValue(null);
+                return Modlist;
             }
             set
             {
@@ -36,17 +40,9 @@ namespace SongBrowser
             }
         }
         static IMod CustomAlbum;
-        static Type CustomType;
-        static Type CustomAlbumInfo;
-        static MethodInfo CustomAlbumFromFile;
-        static FieldInfo albumPackPath;
-        static FieldInfo skinchangermenu;
-        static MethodInfo InitMusicInfo;
-        static FieldInfo albums;
-        static FieldInfo musicPackgeUid;
-        static FieldInfo jsonName;
-        static FieldInfo m_Dictionary;
-        static FieldInfo customAssets;
+        static Type CustomType,CustomAlbumInfo;
+        static MethodInfo CustomAlbumFromFile,InitMusicInfo;
+        static FieldInfo albums,musicPackgeUid,jsonName,m_Dictionary,customAssets,albumPackPath,skinchangermenu;
         public static int MusicPackgeUid
         {
             get
@@ -128,7 +124,8 @@ namespace SongBrowser
             {
                 ModLogger.AddLog("CustomAlbum", "Injecting", name);
                 Mod.menu.Log("Injecting " + name);
-                string directory = Path.Combine(Mod.CurrentDirectory, AlbumPackPath + "\\" + name + ".mdm");
+                //TODO: What the fuck
+                string directory = Path.Combine(Mod.CurrentDirectory, AlbumPackPath ?? "Custom_Songs" + "\\" + name + ".mdm");
 
                 ModLogger.AddLog("CustomAlbum", "Create File", directory);
                 File.WriteAllBytes(directory, data);

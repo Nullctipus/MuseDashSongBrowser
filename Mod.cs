@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Runtime.InteropServices;
+using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Collections.Generic;
@@ -183,7 +184,7 @@ namespace SongBrowser
 
 			GUILayout.BeginHorizontal();
 			Color c2 = GUI.contentColor;
-			GUI.backgroundColor =back;
+			GUI.backgroundColor = back;
 			GUI.contentColor = forr;
             if (GUILayout.Button("Download", GUILayout.Height(40)))
             {
@@ -256,15 +257,8 @@ namespace SongBrowser
         }
 		private bool gettingImage = false;
 		Texture2D cover;
-        public string name = "";
-		public string author = "";
+        public string name,author,scene,levelDesigner,levelDesigner1,levelDesigner2,levelDesigner3,levelDesigner4;
 		public string bpm = "0";
-		public string scene = "";
-		public string levelDesigner = "";
-		public string levelDesigner1 = "";
-		public string levelDesigner2 = "";
-		public string levelDesigner3 = "";
-		public string levelDesigner4 = "";
 		public string difficulty1 = "0";
 		public string difficulty2 = "0";
 		public string difficulty3 = "0";
@@ -286,7 +280,8 @@ namespace SongBrowser
 
 		public static HarmonyMethod GetPatch(string name)
 		{
-			return new HarmonyMethod(typeof(Mod).GetMethod(name, BindingFlags.Static | BindingFlags.NonPublic));
+			return new HarmonyMethod(typeof(Mod).GetMethod(name,
+			 BindingFlags.Static | BindingFlags.NonPublic));
 		}
 		public static void Destroy()
         {
@@ -303,10 +298,12 @@ namespace SongBrowser
 			if (Environment.GetCommandLineArgs().Contains("--ingameconsole")) 
 			{
 				INGAME = true;
-				harmony.Patch(typeof(ModHelper.ModLogger).GetMethod("AddLog",BindingFlags.Public|BindingFlags.Static),GetPatch(nameof(InGameConsole)));
+				harmony.Patch(typeof(ModHelper.ModLogger).GetMethod("AddLog",
+				BindingFlags.Public|BindingFlags.Static),GetPatch(nameof(InGameConsole)));
 					}
 			Instance = this;
-			harmony.Patch(typeof(Assets.Scripts.GameCore.Managers.MainManager).GetMethod("InitLanguage", BindingFlags.NonPublic | BindingFlags.Instance), null, GetPatch(nameof(OnStart)));
+			harmony.Patch(typeof(Assets.Scripts.GameCore.Managers.MainManager).GetMethod("InitLanguage",
+			 BindingFlags.NonPublic | BindingFlags.Instance), null, GetPatch(nameof(OnStart)));
 			CustomAlbumInterface.Init();
 		}
 		private static void InGameConsole(string className, string methodName, object obj)
